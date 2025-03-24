@@ -367,7 +367,7 @@ fn checkDirForEqualDevice(allocator: Allocator, dev1_stat: linux.Stat, dirname: 
         const dev2_name = try fs.path.joinZ(allocator, &.{ dirname, entry.name });
 
         var dev2_stat: linux.Stat = undefined;
-        const errno = linux.stat(dev2_name.ptr, &dev2_stat);
+        const errno = linux.fstatat(dev2_name.ptr, &dev2_stat);
         if (errno > 0) continue;
 
         if (dev1_stat.rdev == dev2_stat.rdev) {
@@ -386,7 +386,7 @@ fn findStableDevPath(allocator: Allocator, device: []const u8) !?[]const u8 {
 
     const device_name = posix.toPosixPath(device) catch return null;
     var dev_stat: linux.Stat = undefined;
-    const errno: usize = linux.stat(&device_name, &dev_stat);
+    const errno: usize = linux.fstatat(&device_name, &dev_stat);
     if (errno > 0) {
         return null;
     }
@@ -487,7 +487,7 @@ fn findFilesystems(allocator: Allocator, root_dir: []const u8) ![]Filesystem {
         const is_dir = blk: {
             const dirname = try posix.toPosixPath(mountpoint_absolute);
             var stat_buf: linux.Stat = undefined;
-            const errno = linux.stat(&dirname, &stat_buf);
+            const errno = linux.fstatat(&dirname, &stat_buf);
             if (errno > 0) {
                 break :blk false;
             }
@@ -604,7 +604,7 @@ fn findFilesystems(allocator: Allocator, root_dir: []const u8) ![]Filesystem {
             const filename = try fmt.allocPrintZ(allocator, "/sys/class/block/{s}/dm/uuid", .{device_name});
 
             var stat_buf: linux.Stat = undefined;
-            const errno = linux.stat(filename, &stat_buf);
+            const errno = linux.fstatat(filename, &stat_buf);
             if (errno > 0) {
                 break :blk false;
             }

@@ -219,7 +219,7 @@ const Options = struct {
 fn isValidMountpoint(path: []const u8) !void {
     // Check if mountpoint is directory
     var stat_buf: linux.Stat = undefined;
-    var errno = linux.stat(&(try posix.toPosixPath(path)), &stat_buf);
+    var errno = linux.fstatat(&(try posix.toPosixPath(path)), &stat_buf);
     if (errno > 0) {
         const err = posix.errno(errno);
         switch (err) {
@@ -242,7 +242,7 @@ fn isValidMountpoint(path: []const u8) !void {
     var components = mem.tokenizeScalar(u8, path, '/');
     while (components.next()) |_| {
         const dirname = path[0..components.index];
-        errno = linux.stat(&(try posix.toPosixPath(dirname)), &stat_buf);
+        errno = linux.fstatat(&(try posix.toPosixPath(dirname)), &stat_buf);
         if (errno > 0) {
             log.err("unable to stat {s}: {}", .{ dirname, errno });
         }
